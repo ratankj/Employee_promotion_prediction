@@ -6,7 +6,7 @@ from datetime import datetime
 def get_time_stamp():
     return f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
 
-CURRENT_TIME = get_time_stamp()
+CURRENT_TIME_STAMP = get_time_stamp()
 
 ROOT_DIR_KEY =  os.getcwd()
 
@@ -15,7 +15,7 @@ DATA_DIR_KEY = "employee_pro.csv"
 
 # artifact
 
-ARTIFACTS_DIR = "Artifact"
+ARTIFACT_DIR_KEY = "Artifact"
 
  #Data Ingestion constants
 
@@ -32,9 +32,15 @@ TEST_DATA_DIR_KEY = 'test.csv'
 DATA_VALIDATION_KEY = 'data_validation'
 
 DATA_VALIDATION_VALIDATED_DIR_KEY = 'validated_dir'
+VALIDATED_TRAIN_DIR_KEY = 'validated_train.csv'
+VALIDATED_TEST_DIR_KEY = 'validated_test.csv'
+
 
 # data validation constants
 DATA_TRANSFORMATION_ARTIFACT = 'data_transformation'
+
+
+DATA_PREPROCESSED_DIR='preprocessed'
 DATA_TRANSFORMATION_PREPROCESSING_OBJ = 'preprocessor.pkl'
 
 
@@ -42,5 +48,8 @@ DATA_TRANSFORMATION_PREPROCESSING_OBJ = 'preprocessor.pkl'
 # model trainer constants
 MODEL_ARTIFACT = 'model_trainer'
 MODEL_OBJECT = 'model.pkl'
+
+
+
 
 
