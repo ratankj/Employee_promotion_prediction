@@ -11,9 +11,10 @@ from dataclasses import dataclass
 
 @dataclass
 class DataIngestionconfig:
-    raw_data_path:str=RAW_FILE_PATH
+    
     train_data_path:str= TRAIN_FILE_PATH
     test_data_path:str= TEST_FILE_PATH
+    raw_data_path:str=RAW_FILE_PATH
 
 class DataIngestion:
     def __init__(self):
@@ -22,14 +23,25 @@ class DataIngestion:
 
     def initiate_data_ingestion(self):
         logging.info(" data ingestion started...")
+        logging.info(f"data set path: {DATASET_PATH}")
 
         try:
             df=pd.read_csv(DATASET_PATH)
-        
-            #logging.info(f"dataset path : {DATASET_PATH}"
+
+            logging.info("tring to add")
+
+            employee_file_name=os.path.basename(DATASET_PATH)
+            
+
+            logging.info(f"basename: {employee_file_name}")
+
 
             os.makedirs(os.path.dirname(self.data_ingestion_config.raw_data_path),exist_ok=True)
+
+
+            
             df.to_csv(self.data_ingestion_config.raw_data_path,index=False)
+
             
 
             logging.info("train test split")
@@ -39,12 +51,15 @@ class DataIngestion:
             os.makedirs(os.path.dirname(self.data_ingestion_config.train_data_path),exist_ok=True)
             train_set.to_csv(self.data_ingestion_config.train_data_path,index=False,header=True)
 
+            logging.info(f"train data path, {TRAIN_FILE_PATH}")
+
             os.makedirs(os.path.dirname(self.data_ingestion_config.test_data_path),exist_ok=True)
             test_Set.to_csv(self.data_ingestion_config.test_data_path,index=False,header=True)
             
-            logging.info(f"train data path, {TRAIN_FILE_PATH}")
+            logging.info(f"train data path, {TEST_FILE_PATH}")
 
-            logging.info("data insgested into raw, train and test data")
+            logging.info("data ingestion complete")
+
 
             return(
 
