@@ -16,9 +16,8 @@ from sklearn.pipeline import Pipeline
 from employee.utils.utils import save_object
 from imblearn.combine import SMOTETomek
 from sklearn.impute import IterativeImputer
-from sklearn.experimental import enable_iterative_imputer
-from sklearn.impute import IterativeImputer
-from sklearn.linear_model import BayesianRidge
+
+
 
 @dataclass
 class DataTransformationConfig():
@@ -39,9 +38,9 @@ class DataTransformation():
             ordinal_encod=['education']
 # numarical
             numerical_columns = ['no_of_trainings','age','previous_year_rating','length_of_service',
-                                 'kpi_80','award_won','avg_training_score ']
+                                 'kpi_80','award_won','avg_training_score ','sum_metric','total_score']
 # categorical features
-            categorical_column =['gender']
+            categorical_column =['gender','department']
 
 
 
@@ -50,8 +49,7 @@ class DataTransformation():
             
             
             numerical_pipeline=Pipeline(steps=[
-                ('impute',IterativeImputer(estimator=BayesianRidge(), initial_strategy='mean', n_nearest_features=None, 
-                                           imputation_order='ascending')),
+                ('impute',IterativeImputer()),
                 ('scaler',StandardScaler()),
                 ('transformer', PowerTransformer(method='yeo-johnson', standardize=False))
             ])
@@ -119,6 +117,9 @@ class DataTransformation():
             logging.info(f" total nulll percentage : {train_precent}")
 
 
+
+
+
 # missing value in education and previous year training
 
             train_df['education'] = train_df['education'].fillna(train_df['education'].mode()[0])
@@ -143,19 +144,50 @@ class DataTransformation():
                                  'kpi_80','award_won','avg_training_score ']
            
 
-            # Assuming 'df' is your DataFrame
+# dropping column
+
+            train_df = train_df.drop(['region', 'recruitment_channel'], axis = 1)
+            test_df = test_df.drop([ 'region', 'recruitment_channel'], axis = 1)
+
+
+
+# no award winner, No KPIs_met >80%, previous year rating = 1, avg_training score < 60
+
+            train_df = test_df.drop(train_df[(train_df['kpi_80'] == 0) & (train_df['previous_year_rating'] == 1.0) & 
+      (train_df['award_won'] == 0) & (train_df['avg_training_score'] < 60) & (train_df['is_promoted'] == 1)].index)
+
+            test_df = test_df.drop(test_df[(test_df['kpi_80'] == 0) & (test_df['previous_year_rating'] == 1.0) & 
+      (test_df['award_won'] == 0) & (test_df['avg_training_score'] < 60) & (test_df['is_promoted'] == 1)].index)
+
+
+# adding new transformed column
+            # Create a metric of sum
+            train_df['sum_metric'] = train_df['award_won'] + train_df['kpi_80'] + train_df['previous_year_rating']
+            test_df['sum_metric'] = test_df['award_won'] + test_df['kpi_80'] + test_df['previous_year_rating']
+
+            # Create a total score column
+            train_df['total_score'] = train_df['avg_training_score'] * train_df['no_of_trainings']
+            test_df['total_score'] = test_df['avg_training_score'] * test_df['no_of_trainings']
+
+
+
+     # finding the numerical column
             num_col = [feature for feature in train_df.columns if train_df[feature].dtype != '0']
             
 
 
             logging.info(f"numerical_columns: {num_col}")
 
-            for col in numerical_columns:
+
+
+# outlier
+
+            for col in num_col:
                 self._remove_outliers_IQR(col=col, df= train_df)
             
             logging.info(f"Outlier capped in train df")
             
-            for col in numerical_columns:
+            for col in num_col:
                 self._remove_outliers_IQR(col=col, df= test_df)
                 
             logging.info(f"Outlier capped in test df") 
@@ -165,7 +197,17 @@ class DataTransformation():
             logging.info(f"Train Dataframe Head:\n{train_df.head().to_string()}")
             logging.info(f"Test Dataframe Head:\n{test_df.head().to_string()}")
 
-            target_column_name = 'concrete_compressive_strength'
+
+
+
+
+
+
+
+
+# target column -- is_promoted
+
+            target_column_name = 'is_promoted'
 
             X_train = train_df.drop(columns=target_column_name,axis=1)
             y_train = train_df[target_column_name]
@@ -186,6 +228,8 @@ class DataTransformation():
             logging.info(f"shape of {X_train.shape} and {y_train.shape}")
             logging.info(f"shape of {X_test.shape} and {y_test.shape}")
 
+
+# sampling
             smt = SMOTETomek(random_state=42,sampling_strategy='minority')
             
             input_feature_train_arr, target_feature_train_df = smt.fit_resample(X_train, y_train)
@@ -198,8 +242,8 @@ class DataTransformation():
 
 
 
-            train_arr =np.c_[X_train,np.array(y_train)]
-            test_arr =np.c_[X_test,np.array(y_test)]
+            train_arr =np.c_[input_feature_train_arr,np.array(target_feature_train_df)]
+            test_arr =np.c_[input_feature_test_arr,np.array(target_feature_test_df)]
 
             logging.info("train arr , test arr")
 
