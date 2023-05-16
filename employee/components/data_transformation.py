@@ -11,10 +11,14 @@ import pandas as pd
 import numpy as np
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler,PowerTransformer
+from sklearn.preprocessing import StandardScaler,PowerTransformer,OrdinalEncoder,OneHotEncoder
 from sklearn.pipeline import Pipeline
 from employee.utils.utils import save_object
 from imblearn.combine import SMOTETomek
+from sklearn.impute import IterativeImputer
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+from sklearn.linear_model import BayesianRidge
 
 @dataclass
 class DataTransformationConfig():
@@ -30,19 +34,45 @@ class DataTransformation():
         try:
             logging.info("Loading data transformation")
             
-           
-
+# ordinal
+            education=["Below Secondary", "Bachelor's", "Master's & above"]
+            ordinal_encod=['education']
+# numarical
             numerical_columns = ['no_of_trainings','age','previous_year_rating','length_of_service',
                                  'kpi_80','award_won','avg_training_score ']
+# categorical features
+            categorical_column =['gender']
+
+
+
+                
+
+            
             
             numerical_pipeline=Pipeline(steps=[
-                ('impute',SimpleImputer(strategy='constant',fill_value=0)),
+                ('impute',IterativeImputer(estimator=BayesianRidge(), initial_strategy='mean', n_nearest_features=None, 
+                                           imputation_order='ascending')),
                 ('scaler',StandardScaler()),
                 ('transformer', PowerTransformer(method='yeo-johnson', standardize=False))
             ])
 
+            oridinal_pipeline=Pipeline(steps=[
+                ('imputer',SimpleImputer(strategy='most_frequent')),
+                ('ordinal',OrdinalEncoder(categories=[education])),
+                ('scaler',StandardScaler(with_mean=False))  
+
+            ])
+
+            categorical_pipeline=Pipeline(steps=[
+                ('impute',SimpleImputer(strategy='most_frequent')),
+                ('onehot',OneHotEncoder(handle_unknown='ignore')),
+                ('scaler',StandardScaler(with_mean=False))
+                ])
+
             preprocessor =ColumnTransformer([
-                ('numerical_pipeline',numerical_pipeline,numerical_columns)
+                ('numerical_pipeline',numerical_pipeline,numerical_columns),
+                ('ordinal_pipeline',oridinal_pipeline,ordinal_encod),
+                ('category_pipeline',categorical_pipeline,categorical_column)
             ])
 
             return preprocessor
@@ -88,10 +118,16 @@ class DataTransformation():
             train_precent = ((train_df.isnull().sum() / train_df.shape[0])*100).round(2)
             logging.info(f" total nulll percentage : {train_precent}")
 
+
+# missing value in education and previous year training
+
             train_df['education'] = train_df['education'].fillna(train_df['education'].mode()[0])
             train_df['previous_year_rating'] = train_df['previous_year_rating'].fillna(train_df['previous_year_rating'].mode()[0])
 
             logging.info("fill value in train.csv")
+
+            logging.info(f"unique value in eduction {train_df['education'].unique() }")
+            logging.info(f"unique value in previous_year_rating {train_df['previous_year_rating'].unique() }")
 
 
             test_df['education'] = test_df['education'].fillna(test_df['education'].mode()[0])
@@ -99,7 +135,10 @@ class DataTransformation():
 
             logging.info("fill value in test.csv")
 
+            logging.info(f"unique value in eduction {test_df['education'].unique() }")
+            logging.info(f"unique value in previous_year_rating {test_df['previous_year_rating'].unique() }")
 
+# numerical column
             numerical_columns = ['no_of_trainings','age','previous_year_rating','length_of_service',
                                  'kpi_80','award_won','avg_training_score ']
            
