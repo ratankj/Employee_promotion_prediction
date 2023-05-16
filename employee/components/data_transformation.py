@@ -15,7 +15,7 @@ from sklearn.preprocessing import StandardScaler,PowerTransformer,OrdinalEncoder
 from sklearn.pipeline import Pipeline
 from employee.utils.utils import save_object
 from imblearn.combine import SMOTETomek
-from sklearn.impute import IterativeImputer
+
 
 
 
@@ -34,29 +34,26 @@ class DataTransformation():
             logging.info("Loading data transformation")
             
 # ordinal
-            education=["Below Secondary", "Bachelor's", "Master's & above"]
-            ordinal_encod=['education']
+            
+            ordinal_columns=['education']
 # numarical
             numerical_columns = ['no_of_trainings','age','previous_year_rating','length_of_service',
-                                 'kpi_80','award_won','avg_training_score ','sum_metric','total_score']
+                                 'kpi_80','award_won','avg_training_score','sum_metric','total_score']
 # categorical features
-            categorical_column =['gender','department']
+            categorical_columns =['gender','department']
 
-
-
-                
 
             
             
             numerical_pipeline=Pipeline(steps=[
-                ('impute',IterativeImputer()),
+                ('impute',SimpleImputer()),
                 ('scaler',StandardScaler()),
                 ('transformer', PowerTransformer(method='yeo-johnson', standardize=False))
             ])
 
             oridinal_pipeline=Pipeline(steps=[
                 ('imputer',SimpleImputer(strategy='most_frequent')),
-                ('ordinal',OrdinalEncoder(categories=[education])),
+                ('ordinal',OrdinalEncoder()),
                 ('scaler',StandardScaler(with_mean=False))  
 
             ])
@@ -69,8 +66,8 @@ class DataTransformation():
 
             preprocessor =ColumnTransformer([
                 ('numerical_pipeline',numerical_pipeline,numerical_columns),
-                ('ordinal_pipeline',oridinal_pipeline,ordinal_encod),
-                ('category_pipeline',categorical_pipeline,categorical_column)
+                ('ordinal_pipeline',oridinal_pipeline,ordinal_columns),
+                ('category_pipeline',categorical_pipeline,categorical_columns)
             ])
 
             return preprocessor
@@ -100,7 +97,16 @@ class DataTransformation():
             raise CustomException(e, sys) from e 
         
    
-        
+    def transform(self,df):
+        try:
+            df['sum_metric'] = df['award_won'] + df['kpi_80'] + df['previous_year_rating']
+            df['total_score'] = df['avg_training_score'] * df['no_of_trainings']
+
+         
+        except Exception as e:
+            logging.info(" transform and add new columns error occurred")
+            raise CustomException(e, sys) from e
+
     
     def initaite_data_transformation(self,train_path,test_path):
         try:
@@ -151,23 +157,24 @@ class DataTransformation():
 
 
 
-# no award winner, No KPIs_met >80%, previous year rating = 1, avg_training score < 60
-
-            train_df = test_df.drop(train_df[(train_df['kpi_80'] == 0) & (train_df['previous_year_rating'] == 1.0) & 
-      (train_df['award_won'] == 0) & (train_df['avg_training_score'] < 60) & (train_df['is_promoted'] == 1)].index)
-
-            test_df = test_df.drop(test_df[(test_df['kpi_80'] == 0) & (test_df['previous_year_rating'] == 1.0) & 
-      (test_df['award_won'] == 0) & (test_df['avg_training_score'] < 60) & (test_df['is_promoted'] == 1)].index)
-
 
 # adding new transformed column
             # Create a metric of sum
-            train_df['sum_metric'] = train_df['award_won'] + train_df['kpi_80'] + train_df['previous_year_rating']
-            test_df['sum_metric'] = test_df['award_won'] + test_df['kpi_80'] + test_df['previous_year_rating']
+            #train_df['sum_metric'] = train_df['award_won'] + train_df['kpi_80'] + train_df['previous_year_rating']
+            #test_df['sum_metric'] = test_df['award_won'] + test_df['kpi_80'] + test_df['previous_year_rating']
 
             # Create a total score column
-            train_df['total_score'] = train_df['avg_training_score'] * train_df['no_of_trainings']
-            test_df['total_score'] = test_df['avg_training_score'] * test_df['no_of_trainings']
+            #train_df['total_score'] = train_df['avg_training_score'] * train_df['no_of_trainings']
+            #test_df['total_score'] = test_df['avg_training_score'] * test_df['no_of_trainings']
+            logging.info("--------------------------------")
+            self.transform(train_df)
+            self.transform(test_df)
+
+            logging.info("new columns sum_metric , total_score")
+
+
+            logging.info(f"df column **************  {train_df.columns} ")
+            logging.info(f"df column **************  {train_df.dtypes} ")
 
 
 
@@ -177,17 +184,20 @@ class DataTransformation():
 
 
             logging.info(f"numerical_columns: {num_col}")
+            
 
+            numerical_columnss = [ 'no_of_trainings', 'age', 'previous_year_rating',
+                                  'length_of_service', 'kpi_80', 'award_won', 'avg_training_score','sum_metric', 'total_score']
 
 
 # outlier
 
-            for col in num_col:
+            for col in numerical_columnss:
                 self._remove_outliers_IQR(col=col, df= train_df)
             
             logging.info(f"Outlier capped in train df")
             
-            for col in num_col:
+            for col in numerical_columnss:
                 self._remove_outliers_IQR(col=col, df= test_df)
                 
             logging.info(f"Outlier capped in test df") 
@@ -220,18 +230,19 @@ class DataTransformation():
             logging.info(f"shape of {X_test.shape} and {y_test.shape}")
 
             # Transforming using preprocessor obj
-            
+            logging.info(f"dataset column {X_train.columns}" )
             X_train=preprocessing_obj.fit_transform(X_train)            
             X_test=preprocessing_obj.transform(X_test)
 
             logging.info("Applying preprocessing object on training and testing datasets.")
             logging.info(f"shape of {X_train.shape} and {y_train.shape}")
             logging.info(f"shape of {X_test.shape} and {y_test.shape}")
+            logging.info("****************************************************************************")
 
 
 # sampling
             smt = SMOTETomek(random_state=42,sampling_strategy='minority')
-            
+            logging.info("****************************************************************************")
             input_feature_train_arr, target_feature_train_df = smt.fit_resample(X_train, y_train)
             
             input_feature_test_arr, target_feature_test_df = smt.fit_resample(X_test , y_test)
