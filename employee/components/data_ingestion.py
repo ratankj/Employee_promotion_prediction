@@ -29,6 +29,7 @@ class DataIngestion:
             df=pd.read_csv(DATASET_PATH)
 
             logging.info("tring to add")
+            logging.info(f"dataset columns {df.columns}")
 
             employee_file_name=os.path.basename(DATASET_PATH)
             
@@ -41,6 +42,15 @@ class DataIngestion:
 
             
             df.to_csv(self.data_ingestion_config.raw_data_path,index=False)
+            
+
+            df.drop(['employee_id'],axis=1,inplace=True)
+            df.rename(columns = {"awards_won?": "award_won","KPIs_met >80%":"kpi_80"}, inplace = True) 
+            logging.info(" ***********rename column*************")
+
+            logging.info(f"dataset columns {df.columns}")
+
+
 
             
 
@@ -50,13 +60,16 @@ class DataIngestion:
 
             os.makedirs(os.path.dirname(self.data_ingestion_config.train_data_path),exist_ok=True)
             train_set.to_csv(self.data_ingestion_config.train_data_path,index=False,header=True)
+           
 
             logging.info(f"train data path, {TRAIN_FILE_PATH}")
 
             os.makedirs(os.path.dirname(self.data_ingestion_config.test_data_path),exist_ok=True)
             test_Set.to_csv(self.data_ingestion_config.test_data_path,index=False,header=True)
             
-            logging.info(f"train data path, {TEST_FILE_PATH}")
+            
+            
+            logging.info(f"test data path, {TEST_FILE_PATH}")
 
             logging.info("data ingestion complete")
 
@@ -80,5 +93,11 @@ class DataIngestion:
 if __name__ == "__main__":
     obj=DataIngestion()
     train_data,test_data=obj.initiate_data_ingestion()
+
+
+
+# to run data ingestion
+
+# python employee/components/data_ingestion.py
 
     
