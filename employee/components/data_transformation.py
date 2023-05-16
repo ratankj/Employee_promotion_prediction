@@ -2,7 +2,7 @@ import os,sys
 from employee.exception import CustomException
 from employee.logger import logging
 from employee.constant import *
-from employee.config.configuration import PREPROCESSING_OBJ_PATH
+from employee.config.configuration import PREPROCESSING_OBJ_PATH,TRANSFORMED_TRAIN_FILE_PATH,TRANSFORMED_TEST_FILE_PATH
 from dataclasses import dataclass
 
 
@@ -22,6 +22,8 @@ from imblearn.combine import SMOTETomek
 @dataclass
 class DataTransformationConfig():
     preprocessor_obj_file_path=PREPROCESSING_OBJ_PATH
+    transformed_train_path=TRANSFORMED_TRAIN_FILE_PATH
+    transformed_test_path=TRANSFORMED_TEST_FILE_PATH
 
 
 class DataTransformation():
@@ -212,9 +214,6 @@ class DataTransformation():
 
 
 
-
-
-
 # target column -- is_promoted
 
             target_column_name = 'is_promoted'
@@ -255,8 +254,27 @@ class DataTransformation():
 
             train_arr =np.c_[input_feature_train_arr,np.array(target_feature_train_df)]
             test_arr =np.c_[input_feature_test_arr,np.array(target_feature_test_df)]
+            
 
             logging.info("train arr , test arr")
+
+
+            df_train= pd.DataFrame(train_arr)
+            df_test = pd.DataFrame(test_arr)
+
+            logging.info("converting train_arr and test_arr to dataframe")
+            logging.info(f"Final Train Transformed Dataframe Head:\n{df_train.head().to_string()}")
+            logging.info(f"Final Test transformed Dataframe Head:\n{df_test.head().to_string()}")
+
+            os.makedirs(os.path.dirname(self.data_transformation_config.transformed_train_path),exist_ok=True)
+            df_train.to_csv(self.data_transformation_config.transformed_train_path,index=False,header=True)
+
+            logging.info("transformed_train_path")
+
+            os.makedirs(os.path.dirname(self.data_transformation_config.transformed_test_path),exist_ok=True)
+            df_test.to_csv(self.data_transformation_config.transformed_test_path,index=False,header=True)
+
+            logging.info("transformed_test_path")
 
             save_object(
                 file_path=self.data_transformation_config.preprocessor_obj_file_path,
