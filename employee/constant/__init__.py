@@ -48,7 +48,7 @@ TRANSFORMED_TEST_DIR_KEY = 'test.csv'
 
 
 # model trainer constants
-MODEL_ARTIFACT = 'model_trainer'
+MODEL_TRAINER_KEY = 'model_trainer'
 MODEL_OBJECT = 'model.pkl'
 
 
