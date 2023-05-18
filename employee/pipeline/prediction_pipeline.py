@@ -23,6 +23,7 @@ class PredictPipeline:
             pred = model.predict(data_scaled)
 
             return pred
+        
 
 
         except Exception as e:
