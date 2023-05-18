@@ -11,7 +11,7 @@ step 3 - pip install -r requirements.txt
 
 # to run training pipeline
 
-step - python employee/components/pipeline/training_pipeline.py
+step - python employee/pipeline/training_pipeline.py
 
 # to run prediction pipeline
 
