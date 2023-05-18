@@ -270,6 +270,7 @@ class DataTransformation():
             df_train.to_csv(self.data_transformation_config.transformed_train_path,index=False,header=True)
 
             logging.info("transformed_train_path")
+            logging.info(f"transformed dataset columns : {df_train.columns}")
 
             os.makedirs(os.path.dirname(self.data_transformation_config.transformed_test_path),exist_ok=True)
             df_test.to_csv(self.data_transformation_config.transformed_test_path,index=False,header=True)
