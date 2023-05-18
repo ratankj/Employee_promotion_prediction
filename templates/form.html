@@ -1,0 +1,204 @@
+<style>
+    .page {
+      content: "";
+      background-image: url("https://www.synergita.com/blog/wp-content/uploads/2019/09/employee-promotion-synergita-626x400.jpg");
+      background-repeat: no-repeat;
+      background-size: cover;
+      position: absolute;
+      top: 125px;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .container{
+        margin: 10% auto;
+        width: 810px;
+        color: #fff;
+        padding: 20px;
+        border: 1px solid #ccc;
+        background-color: #000;
+        opacity: 0.7;
+    }
+    .section{
+        opacity: 1;
+        padding: 10px;
+        display: inline-block;
+        font-size: 1.25em;
+        margin-right: 20px;
+        min-width: 360px;
+    }
+    .title{
+        width:50%;
+        float: left;
+    }
+    .description{
+        width:50%;
+        float: left;
+    }
+    input, select{
+        padding: 10px;
+        width: 150px;
+    }
+</style>
+<div>
+    <h1 style="background-color: skyblue; text-align: center; padding: 30px 0; font-size: 3em;">Employee Prediction</h1>
+    <div class="page">
+        <div class="container">
+            <div class="section">
+                <div class="title">Department</div>
+                <div class="description">
+                    <select id="Department" name="Department">
+                        <option value="Sales & Marketing">Sales & Marketing</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Analytics">Analytics</option>
+                        <option value="R&D">R&D</option>
+                        <option value="Procurement">Procurement</option>
+                        <option value="Finance">Finance</option>
+                        <option value="HR">HR</option>
+                        <option value="Legal">Legal</option>
+                      </select>
+                </div>
+            </div>
+            <div class="section">
+                <div class="title">education</div>
+                <div class="description">
+                    <select id="education" name="education">
+                        <option value="Bachelor's">Bachelor's</option>
+                        <option value="Below Secondary">Below Secondary</option>
+                        <option value="Master's & above">Master's & above</option>
+                       
+                      </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="title">gender</div>
+                <div class="description">
+                    <select id="gender" name="gender">
+                        <option value="f">f</option>
+                        <option value="m">m</option>
+                       
+                      </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="title">no_of_trainings</div>
+                <div class="description">
+                    <select id="no_of_trainings" name="no_of_trainings">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        
+                                
+                      </select>
+                </div>
+            </div>
+
+
+
+            <div class="section">
+                <div class="title">age</div>
+                <div class="description">
+                    <input type="text" id="employee_age" name="employee_age" placeholder="Enter AGE">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="title">previous_year_rating</div>
+                <div class="description">
+                    <select id="previous_year_rating" name="previous_year_rating">
+                
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                       
+                        
+                                
+                      </select>
+                    
+                </div>
+            </div>
+
+
+
+
+            <div class="section">
+                <div class="title">length_of_service</div>
+                <div class="description">
+                    <input type="text" id="length_of_service" name="length_of_service" placeholder="Enter length_of_service">
+                </div>
+            </div>
+
+
+            <div class="section">
+                <div class="title">kpi_80</div>
+                <div class="description">
+                    <select id="kpi_80" name="kpi_80">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        
+                      </select>
+                </div>
+            </div>
+
+
+
+
+            <div class="section">
+                <div class="title">award_won</div>
+                <div class="description">
+                    <select id="award_won" name="award_won">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                      </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="title">avg_training_score</div>
+                <div class="description">
+                    <input type="text" id="avg_training_score" name="avg_training_score" placeholder="Enter avg_training_score">
+                </div>
+            </div>
+
+
+
+            <div class="section">
+                <div class="title">sum_metric</div>
+                <div class="description">
+                    <input type="text" id="sum_metric" name="sum_metric" placeholder="Enter sum_metric(float)">
+                </div>
+            </div>
+
+
+            <div class="section">
+                <div class="title">total_score</div>
+                <div class="description">
+                    <input type="text" id="total_score" name="total_score" placeholder="Enter total_score">
+                </div>
+            </div>
+
+
+
+            <div style="width:100%; float: left; text-align: center;">
+   
+                <input type="submit" value="Submit" style="width: 200px; height: 50px; background-color: rgb(247, 8, 8); color: white; font-size: 23px;">
+           
+              </div>
+              
+                <h1>Delivery come in {{final_result}} minutes</h1>
+        </div>
+    </div>
+</div>

@@ -5,7 +5,7 @@ from employee.logger import logging
 from employee.utils.utils import load_model
 from employee.config.configuration import  PREPROCESSING_OBJ_PATH,MODEL_FILE_PATH
 
-class PredictionPipeline:
+class PredictPipeline:
     def __init__(self):
         pass
 
@@ -82,7 +82,7 @@ class CustomData:
 
             return df
         
-        
+
         except Exception as e:
             logging.info("Error getting at get data as dataframe")
             raise CustomException(e,sys)
