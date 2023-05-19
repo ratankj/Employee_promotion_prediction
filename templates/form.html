@@ -1,3 +1,4 @@
+
 <style>
     .page {
       content: "";
@@ -41,6 +42,7 @@
     }
 </style>
 <div>
+    <form action="{{url_for('predict_datapoint')}}" method="POST">
     <h1 style="background-color: skyblue; text-align: center; padding: 30px 0; font-size: 3em;">Employee Prediction</h1>
     <div class="page">
         <div class="container">
@@ -76,8 +78,8 @@
                 <div class="title">gender</div>
                 <div class="description">
                     <select id="gender" name="gender">
-                        <option value="f">f</option>
-                        <option value="m">m</option>
+                        <option value="female">f</option>
+                        <option value="male">m</option>
                        
                       </select>
                 </div>
@@ -109,7 +111,7 @@
             <div class="section">
                 <div class="title">age</div>
                 <div class="description">
-                    <input type="text" id="employee_age" name="employee_age" placeholder="Enter AGE">
+                    <input type="text" id="age" name="age" placeholder="Enter AGE">
                 </div>
             </div>
 
@@ -137,7 +139,7 @@
             <div class="section">
                 <div class="title">length_of_service</div>
                 <div class="description">
-                    <input type="text" id="length_of_service" name="length_of_service" placeholder="Enter length_of_service">
+                    <input type="text" id="length_of_service" name="length_of_service" placeholder="length_of_service">
                 </div>
             </div>
 
@@ -198,7 +200,16 @@
            
               </div>
               
-                <h1>Employee promotion {{final_result}} </h1>
+              <h1>Employee promotion {{final_result}}</h1>
+                {% if final_result == 0 %}
+                    <h2 style="color: skyblue;">Employee: Not Promoted</h2>
+                {% elif final_result == 1 %}
+                    <h2 style="color: skyblue;">Employee: Promoted</h2>
+                {% endif %}
+              
+                
+            </form>
         </div>
     </div>
+
 </div>

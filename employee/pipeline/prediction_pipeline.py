@@ -12,8 +12,10 @@ class PredictPipeline:
     def predict(self,features):
         try:
             preprocessor_path=PREPROCESSING_OBJ_PATH
+            #preprocessor_path='D:\ALL_PROJECT FOLDER\EMPLOYEE_PROMOTION\Employee_promotion_prediction\Artifact\data_transformation\2023-05-19 08-43-40\preprocessed\preprocessor.pkl'
             model_path = MODEL_FILE_PATH
-
+            #model_path='D:\ALL_PROJECT FOLDER\EMPLOYEE_PROMOTION\Employee_promotion_prediction\Artifact\model_trainer\2023-05-19 08-43-40\model.pkl'
+            
             preprocessor = load_model(preprocessor_path)
             model = load_model(model_path)
 
@@ -70,6 +72,7 @@ class CustomData:
                 'no_of_trainings':[self.no_of_trainings],
                 'age':[self.age],
                 'previous_year_rating':[self.previous_year_rating],
+                'length_of_service':[self.length_of_service],
                 'kpi_80':[self.kpi_80],
                 'award_won':[self.award_won],
                 'avg_training_score':[self.avg_training_score],
