@@ -2,10 +2,10 @@ import os,sys
 from employee.exception import CustomException
 from employee.logger import logging
 from employee.constant import *
-from employee.config.configuration import PREPROCESSING_OBJ_PATH,TRANSFORMED_TRAIN_FILE_PATH,TRANSFORMED_TEST_FILE_PATH
+from employee.config.configuration import PREPROCESSING_OBJ_PATH,TRANSFORMED_TRAIN_FILE_PATH,TRANSFORMED_TEST_FILE_PATH,FEATURE_ENG_OBJ_PATH
 from dataclasses import dataclass
 
-
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
@@ -18,12 +18,120 @@ from imblearn.combine import SMOTETomek
 
 
 
+class Feature_Engineering(BaseEstimator, TransformerMixin):
+    
+    def __init__(self):
+        
+        """
+        This class applies necessary Feature Engneering 
+        """
+        logging.info(f"\n{'*'*20} Feature Engneering Started {'*'*20}\n\n")
+
+
+    def _remove_outliers_IQR(self, col, df):
+        try:
+            Q1 = df[col].quantile(0.25)
+            Q3 = df[col].quantile(0.75)
+            iqr = Q3 - Q1
+            upper_limit = Q3 + 1.5 * iqr
+            lower_limit = Q1 - 1.5 * iqr
+            df.loc[(df[col]>upper_limit), col]= upper_limit
+            df.loc[(df[col]<lower_limit), col]= lower_limit 
+            return df
+        
+        except Exception as e:
+            logging.info(" outlier code")
+            raise CustomException(e, sys) from e 
+        
+
+
+    def transform(self,df):
+        try:
+            df['sum_metric'] = df['award_won'] + df['kpi_80'] + df['previous_year_rating']
+            df['total_score'] = df['avg_training_score'] * df['no_of_trainings']
+
+            logging.info("new columns sum_metric , total_score")
+
+
+            # Assuming 'df' is your DataFrame
+            num_col = [feature for feature in df.columns if df[feature].dtype != '0']
+            
+            logging.info(f"numerical_columns: {num_col}")
+
+
+            cat_col = [feature for feature in df.columns if df[feature].dtype == 'O']
+            logging.info(f"categorical_columns: {cat_col}")
+
+            
+
+
+            df.drop(columns=['region','recruitment_channel'], inplace=True, axis=1)
+
+            logging.info(f"columns in dataframe are: {df.columns}")
+
+
+            numerical_columnss = [ 'no_of_trainings', 'age', 'previous_year_rating',
+                                  'length_of_service', 'kpi_80', 'award_won', 'avg_training_score','sum_metric', 'total_score']
+
+
+# outlier
+
+            for col in numerical_columnss:
+                self._remove_outliers_IQR(col=col, df= df)
+            
+            logging.info(f"Outlier capped in train df")
+
+
+            
+# missing value in education and previous year training
+
+            df['education'] = df['education'].fillna(df['education'].mode()[0])
+            df['previous_year_rating'] = df['previous_year_rating'].fillna(df['previous_year_rating'].mode()[0])
+
+            logging.info("fill value in df.csv")
+
+            logging.info(f"unique value in eduction {df['education'].unique() }")
+            logging.info(f"unique value in previous_year_rating {df['previous_year_rating'].unique() }")
+     
+           
+
+         
+        except Exception as e:
+            logging.info(" transform and add new columns error occurred")
+            raise CustomException(e, sys) from e
+
+
+
+
+
+    def fit(self,X,y=None):
+        return self
+    
+    
+    def transform(self,X:pd.DataFrame,y=None):
+        try:    
+            transformed_df=self.transform(X)
+                
+            return transformed_df
+        except Exception as e:
+            raise CustomException(e,sys) from e
+
+
+
+
+
+
+
+
+
+
 
 @dataclass
 class DataTransformationConfig():
     preprocessor_obj_file_path=PREPROCESSING_OBJ_PATH
     transformed_train_path=TRANSFORMED_TRAIN_FILE_PATH
     transformed_test_path=TRANSFORMED_TEST_FILE_PATH
+    feature_eng_obj_path=FEATURE_ENG_OBJ_PATH
 
 
 class DataTransformation():
@@ -83,33 +191,17 @@ class DataTransformation():
         
 
 
-    def _remove_outliers_IQR(self, col, df):
+    def get_feature_engineering_object(self):
         try:
-            Q1 = df[col].quantile(0.25)
-            Q3 = df[col].quantile(0.75)
-            iqr = Q3 - Q1
-            upper_limit = Q3 + 1.5 * iqr
-            lower_limit = Q1 - 1.5 * iqr
-            df.loc[(df[col]>upper_limit), col]= upper_limit
-            df.loc[(df[col]<lower_limit), col]= lower_limit 
-            return df
-        
+            
+            feature_engineering = Pipeline(steps = [("fe",Feature_Engineering())])
+            return feature_engineering
         except Exception as e:
-            logging.info(" outlier code")
-            raise CustomException(e, sys) from e 
-        
-   
-    def transform(self,df):
-        try:
-            df['sum_metric'] = df['award_won'] + df['kpi_80'] + df['previous_year_rating']
-            df['total_score'] = df['avg_training_score'] * df['no_of_trainings']
+            raise CustomException(e,sys) from e
 
-         
-        except Exception as e:
-            logging.info(" transform and add new columns error occurred")
-            raise CustomException(e, sys) from e
 
-    
+
+
     def initaite_data_transformation(self,train_path,test_path):
         try:
             # Reading train and test data
@@ -128,49 +220,35 @@ class DataTransformation():
 
 
 
-# missing value in education and previous year training
-
-            train_df['education'] = train_df['education'].fillna(train_df['education'].mode()[0])
-            train_df['previous_year_rating'] = train_df['previous_year_rating'].fillna(train_df['previous_year_rating'].mode()[0])
-
-            logging.info("fill value in train.csv")
-
-            logging.info(f"unique value in eduction {train_df['education'].unique() }")
-            logging.info(f"unique value in previous_year_rating {train_df['previous_year_rating'].unique() }")
-
-
-            test_df['education'] = test_df['education'].fillna(test_df['education'].mode()[0])
-            test_df['previous_year_rating'] = test_df['previous_year_rating'].fillna(test_df['previous_year_rating'].mode()[0])
-
-            logging.info("fill value in test.csv")
-
-            logging.info(f"unique value in eduction {test_df['education'].unique() }")
-            logging.info(f"unique value in previous_year_rating {test_df['previous_year_rating'].unique() }")
 
 # numerical column
             numerical_columns = ['no_of_trainings','age','previous_year_rating','length_of_service',
                                  'kpi_80','award_won','avg_training_score ']
            
 
-# dropping column
+           # Feature engimeering pipleine
+                    # Feature Engineering 
+            logging.info(f"Obtaining feature engineering object.")
+            fe_obj = self.get_feature_engineering_object()
 
-            train_df = train_df.drop(['region', 'recruitment_channel'], axis = 1)
-            test_df = test_df.drop([ 'region', 'recruitment_channel'], axis = 1)
+            logging.info(f"Applying feature engineering object on training dataframe and testing dataframe")
+            logging.info(">>>" * 20 + " Training data " + "<<<" * 20)
+            logging.info(f"Feature Enineering - Train Data ")
+            train_df = fe_obj.fit_transform(train_df)
+            logging.info(">>>" * 20 + " Test data " + "<<<" * 20)
+            logging.info(f"Feature Enineering - Test Data ")
+            test_df = fe_obj.transform(test_df)
 
 
 
+            # Preprocessing pipeline 
+            preprocessing_obj = self.get_data_transformation_object()
 
-# adding new transformed column
-            # Create a metric of sum
-            #train_df['sum_metric'] = train_df['award_won'] + train_df['kpi_80'] + train_df['previous_year_rating']
-            #test_df['sum_metric'] = test_df['award_won'] + test_df['kpi_80'] + test_df['previous_year_rating']
+            logging.info(f"Train Dataframe Head:\n{train_df.head().to_string()}")
+            logging.info(f"Test Dataframe Head:\n{test_df.head().to_string()}")
 
-            # Create a total score column
-            #train_df['total_score'] = train_df['avg_training_score'] * train_df['no_of_trainings']
-            #test_df['total_score'] = test_df['avg_training_score'] * test_df['no_of_trainings']
-            logging.info("--------------------------------")
-            self.transform(train_df)
-            self.transform(test_df)
+
+
 
             logging.info("new columns sum_metric , total_score")
 
@@ -182,33 +260,11 @@ class DataTransformation():
 
      # finding the numerical column
             num_col = [feature for feature in train_df.columns if train_df[feature].dtype != '0']
-            
-
-
+        
             logging.info(f"numerical_columns: {num_col}")
             
 
-            numerical_columnss = [ 'no_of_trainings', 'age', 'previous_year_rating',
-                                  'length_of_service', 'kpi_80', 'award_won', 'avg_training_score','sum_metric', 'total_score']
-
-
-# outlier
-
-            for col in numerical_columnss:
-                self._remove_outliers_IQR(col=col, df= train_df)
             
-            logging.info(f"Outlier capped in train df")
-            
-            for col in numerical_columnss:
-                self._remove_outliers_IQR(col=col, df= test_df)
-                
-            logging.info(f"Outlier capped in test df") 
-
-            preprocessing_obj = self.get_data_transformation_object()
-
-            logging.info(f"Train Dataframe Head:\n{train_df.head().to_string()}")
-            logging.info(f"Test Dataframe Head:\n{test_df.head().to_string()}")
-
 
 
 
@@ -282,6 +338,13 @@ class DataTransformation():
                 obj=preprocessing_obj)
             
             logging.info("Preprocessor file saved")
+
+            save_object(
+                file_path=self.data_transformation_config.feature_eng_obj_path,
+                obj=fe_obj)
+            logging.info("Feature eng file saved")
+
+
             
             return(train_arr,
                    test_arr,

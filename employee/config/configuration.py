@@ -47,6 +47,11 @@ TRANSFORMED_TEST_FILE_PATH = os.path.join(ROOT_DIR, ARTIFACT_DIR_KEY,DATA_TRANSF
                                           DATA_TRANSFORMED_DIR,TRANSFORMED_TEST_DIR_KEY) 
 
 
+FEATURE_ENG_OBJ_PATH = os.path.join(ROOT_DIR,ARTIFACT_DIR_KEY,
+                                      DATA_TRANSFORMATION_ARTIFACT,DATA_PREPROCESSED_DIR,
+                                      'feature_eng.pkl')
+
+
 
 # MODEL FILE
 
