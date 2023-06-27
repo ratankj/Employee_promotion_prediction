@@ -87,7 +87,7 @@ class batch_prediction:
             
             df=df.drop('is_promoted', axis=1)
             
-            df.to_csv('dropped_strength.csv')
+            df.to_csv('dropped_is_promoted.csv')
           
                 
                 

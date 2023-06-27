@@ -96,7 +96,7 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
             logging.info(f"Train Dataframe Head:\n{df.head().to_string()}")
             #logging.info(f"Test Dataframe Head:\n{test_df.head().to_string()}")
      
-           
+            return df
 
          
         except Exception as e:
@@ -245,6 +245,8 @@ class DataTransformation():
 
 
 
+
+
             # Preprocessing pipeline 
             preprocessing_obj = self.get_data_transformation_object()
 
@@ -266,8 +268,8 @@ class DataTransformation():
             y_test = test_df[target_column_name]
 
 
-            logging.info(f"shape of {X_train.shape} and {y_train.shape}")
-            logging.info(f"shape of {X_test.shape} and {y_test.shape}")
+            #logging.info(f"shape of {X_train.shape} and {y_train.shape}")
+            #logging.info(f"shape of {X_test.shape} and {y_test.shape}")
 
             # Transforming using preprocessor obj
             logging.info(f"dataset column {X_train.columns}" )
