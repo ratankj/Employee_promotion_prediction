@@ -45,7 +45,7 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
         
 
 
-    def transform(self,df):
+    def transform_data(self,df):
         try:
             df['sum_metric'] = df['award_won'] + df['kpi_80'] + df['previous_year_rating']
             df['total_score'] = df['avg_training_score'] * df['no_of_trainings']
@@ -82,7 +82,7 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
             logging.info(f"Outlier capped in train df")
 
 
-            
+
 # missing value in education and previous year training
 
             df['education'] = df['education'].fillna(df['education'].mode()[0])
@@ -92,6 +92,9 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
 
             logging.info(f"unique value in eduction {df['education'].unique() }")
             logging.info(f"unique value in previous_year_rating {df['previous_year_rating'].unique() }")
+
+            logging.info(f"Train Dataframe Head:\n{df.head().to_string()}")
+            #logging.info(f"Test Dataframe Head:\n{test_df.head().to_string()}")
      
            
 
@@ -110,7 +113,7 @@ class Feature_Engineering(BaseEstimator, TransformerMixin):
     
     def transform(self,X:pd.DataFrame,y=None):
         try:    
-            transformed_df=self.transform(X)
+            transformed_df=self.transform_data(X)
                 
             return transformed_df
         except Exception as e:
@@ -153,6 +156,7 @@ class DataTransformation():
             categorical_columns =['gender','department']
 
 
+            logging.info("ordinal_columns -  numerical_columns -  categorical_columns")
             
             
             numerical_pipeline=Pipeline(steps=[
@@ -244,35 +248,16 @@ class DataTransformation():
             # Preprocessing pipeline 
             preprocessing_obj = self.get_data_transformation_object()
 
-            logging.info(f"Train Dataframe Head:\n{train_df.head().to_string()}")
-            logging.info(f"Test Dataframe Head:\n{test_df.head().to_string()}")
-
-
-
-
-            logging.info("new columns sum_metric , total_score")
-
-
-            logging.info(f"df column **************  {train_df.columns} ")
-            logging.info(f"df column **************  {train_df.dtypes} ")
-
-
-
-     # finding the numerical column
-            num_col = [feature for feature in train_df.columns if train_df[feature].dtype != '0']
-        
-            logging.info(f"numerical_columns: {num_col}")
             
-
-            
-
-
 
 
 
 # target column -- is_promoted
 
             target_column_name = 'is_promoted'
+
+            logging.info(f"shape of {train_df.shape} and {test_df.shape}")
+            
 
             X_train = train_df.drop(columns=target_column_name,axis=1)
             y_train = train_df[target_column_name]
@@ -319,8 +304,8 @@ class DataTransformation():
             df_test = pd.DataFrame(test_arr)
 
             logging.info("converting train_arr and test_arr to dataframe")
-            logging.info(f"Final Train Transformed Dataframe Head:\n{df_train.head().to_string()}")
-            logging.info(f"Final Test transformed Dataframe Head:\n{df_test.head().to_string()}")
+            #logging.info(f"Final Train Transformed Dataframe Head:\n{df_train.head().to_string()}")
+            #logging.info(f"Final Test transformed Dataframe Head:\n{df_test.head().to_string()}")
 
             os.makedirs(os.path.dirname(self.data_transformation_config.transformed_train_path),exist_ok=True)
             df_train.to_csv(self.data_transformation_config.transformed_train_path,index=False,header=True)
