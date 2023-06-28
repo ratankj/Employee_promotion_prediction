@@ -243,6 +243,10 @@ class DataTransformation():
             logging.info(f"Feature Enineering - Test Data ")
             test_df = fe_obj.transform(test_df)
 
+            train_df.to_csv("train_data.csv")
+            test_df.to_csv("test_data.csv")
+            logging.info(f"Saving csv to train_data and test_data.csv")
+
 
 
 

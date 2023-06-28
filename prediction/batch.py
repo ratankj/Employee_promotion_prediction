@@ -73,8 +73,15 @@ class batch_prediction:
             # Read the input file
             df = pd.read_csv(self.input_file_path)
 
+            df.to_csv("df_promoted_input_Data.csv")
+
+            df.drop(['employee_id'],axis=1,inplace=True)
+            df.rename(columns = {"awards_won?": "award_won","KPIs_met >80%":"kpi_80"}, inplace = True) 
+
             # Apply feature engineering
             df = feature_engineering_pipeline.transform(df)
+
+            df.to_csv("df_feature_enginnering.csv")
             
             # Save the feature-engineered data as a CSV file
             FEATURE_ENG_PATH = FEATURE_ENG  # Specify the desired path for saving the CSV file
